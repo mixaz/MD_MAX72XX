@@ -5,8 +5,15 @@
  * \brief Main header file for the MD_MAX72xx library
  */
 
-#ifdef __MBED__
-#include "mbed.h"
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+
+//#define __MBED__ 1
+
+//#ifdef __MBED__
+//#include "mbed.h"
 #define delay   ThisThread::sleep_for
 #ifndef PROGMEM
  #define PROGMEM
@@ -35,255 +42,9 @@
 #ifndef pgm_read_dword
  #define pgm_read_dword(addr) (*(const unsigned long *)(addr))
 #endif
-#else
-#include <Arduino.h>
-#endif
-
-/**
-\mainpage Arduino LED Matrix Library
-The Maxim 72xx LED Controller IC
---------------------------------
-The MAX7219/MAX7221 are compact, serial input/output display drivers that
-interface microprocessors to 7-segment numeric LED displays of up to 8 digits,
-bar-graph displays, or 64 individual LEDs. Included on-chip are a BCD code-B
-decoder, multiplex scan circuitry, segment and digit drivers, and an 8x8 static
-RAM that stores each digit.
-
-A 4-wire serial interface (SPI) allows the devices to be cascaded, with
-communications passed through the first device in the chain to all others. Individual
-elements may be addressed and updated without rewriting the entire display.
-
-This library implements functions that allow the MAX72xx to be used
-for LED matrices (64 individual LEDs), allowing the programmer to use the LED
-matrix as a pixel device, displaying graphics elements much like any other
-pixel addressable display.
-
-Topics
-------
-- \subpage pageHardware
-- \subpage pageSoftware
-- \subpage pageConnect
-- \subpage pageFontUtility
-- \subpage pageRevisionHistory
-- \subpage pageCopyright
-- \subpage pageDonation
-
-\page pageDonation Support the Library
-If you like and use this library please consider making a small donation using [PayPal](https://paypal.me/MajicDesigns/4USD)
-
-\page pageCopyright Copyright
-Copyright (C) 2012-18 Marco Colli. All rights reserved.
-
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
-
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-
-\page pageRevisionHistory Revision History
-Aug 2020 version 3.2.3
-- Corrected Message_Serial example
-
-Nov 2019 version 3.2.2
-- Added structured hardware names for untested hardware configurations (\ref pageNewHardware).
-- Mbed (https://github.com/ARMmbed/mbed-os) support (PR #30 from JojoS62, 2020-07-06)
-
-Oct 2019 version 3.2.1
-- First large (150 module system) - increase size of SPI counters to int16_t
-
-Sep 2019 version 3.2.0
-- Change character codes to 16 bit to allow up to 65535 characters in font table.
-- Retested examples for clean compile with new version of compiler.
-
-May 2019 version 3.1.0
-- Changed font definition to more modern look.
-- Font ASCII code > 127 now conforms to unicode Latin-1 supplement.
-
-Oct 2018 version 3.0.2
-- Updated to remove 'left over' serial print debug.
-
-Aug 2018 version 3.0.1
-- Fixed problem with calculating font width in info structure.
-
-June 2018 version 3.0.0
-- Implemented new font file format (file format version 1).
-- Removed 'drawXXX' graphics functions to new MD_MAXPanel library.
-- Removed font indexing as this never used.
-- Added getFontHeight() method.
-- Module type now specified at run time.
-
-Apr 2018 version 2.11.1
-- Another attempt to further clarify editing of header file for hardware changes.
-
-Apr 2018 version 2.11.0
-- Restructured header file to make hardware flags more obvious
-- Added drawHLine(), drawVLine(), drawRectangle() methods
-
-Mar 2018 version 2.10.1
-- Reworked HW Mapping utility.
-- setColumn() parameter changed from uint8_t to uint16_t to allow for more than 256 column in the matrix [BUG]
-
-Nov 2017 version 2.10.0
-- Changed SPI buffer handling and isolation of AVR specific features (eg PROGMEM)
-- Added MD_MAX72xx_Message_ESP8266 example
-- Minor source file cleanup
-- Added Extended ASCII font, vertical rotated font and RobotEyes font in fontbuilder
-- Modified font builder output code for consistency with new code
-- Added getFont(), getMaxFontWidth() methods
-- Changed example - replaced MD_KeySwitch with new MD_UISwitch library
-
-Nov 2016 version 2.9.0
-- Added WordClock example
-- Deprecated USE_LIBRARY_SPI as no problems reported with new implementation
-- Changed MD_ branding to new MajicDesigns diamond
-- Small adjustments to initialization code
-
-Mar 2016 version 2.8
-- Added example Message_SD and renamed Message to Message_Serial
-- Added Pacman example
-- Added PushWheel example
-- Added USE_LIBRARY_SPI to enable library SPI object
-- Modified all examples to conditionally include <SPI.h>
-- FontBuilder modified to handle definitions for double height fonts
-- New txt2font utility for easier font creation from a text file
-- Revised and re-organized documentation; expanded section on fonts
-
-April 2015 version 2.7
-- Changed to Daft Punk example to run without switch
-- Now supporting IDE Library Manager
-
-February 2015 version 2.6
-- Improvements to HW_Mapper utility
-- Added HW_USE_FC16 for FC-16 display modules
-- Added USE_HW_OTHER for user defined hardware configuration
-- Fixed incorrect spelling for HW_REV_COLS in transformBuffer() & corresponding bug
-- Added PrintText_ML example
-
-February 2015 version 2.5
-- Documented process for adding new hardware module type
-- Fixed PROGMEM definitions for IDE version 1.5.7 compile error
-- Added Daft Punk example code
-- Updated HW_Mapper example/utility with built-in instructions
-- Minor problems with Parola font setting interaction fixed
-
-April 2014 version 2.4
-- Improved reliability of initialization code to remove artifacts
- + Changed order of hardware initialization for SS, _csPin
- + Changed initialization sequence at begin()
- + Fixed memset bug identified by bperrybap
-- Reworked command SPI transmissions for efficiency
-- Cleanup up compiler warnings on inline wrapper code functions
-- Cleaned up examples begin() - better defined library default values
-- Reviewed and tidied up some documentation
-
-March 2014 - version 2.3
-- Extensive rework of the font system
- + New Microsoft Excel VBA based font builder tool available
- + Removed USE_FONT_ADJUST and related code - replace by builder tool
- + Fixed width font has been removed from the library. Definition still available in font builder
- + fontype_t definition changed to suit new requirements
-- Transform zoning implemented (contiguous subset of services)
- + Transformation functions, control, clear, setRow methods overloaded with range specifier
- + User callback for L/R rotation function syntax added a device parameter
- + New Zones example
-- USE_*_HW hardware types now separated out for future flexibility
- + Rework of the library to use new schema for defining hardware characteristics
- + New utility code to map out digits and segments for unknown hardware types
-- Rechecked and reworked examples for new library
-
-November 2013 - version 2.2
-- Replaced reference to SPI library with inline code to allow for different select lines
-- Obsoleted INCLUDE_HARDWARE_SPI conditional compile switch
-- Fixed legacy code function name error when USE_FONT_ADJUST switch turned on
-- Implemented USE_PAROLA_HW to allow cheaply available matrix modules to be used in ganged mode
-- Fixed reversal of bit field for set/get Row/Column functions -> flipped charset data
-- Added Eyes example program
-- Upgraded and reorganized documentation
-
-June 2013 - version 2.1
-- Include the selection of hardware SPI interface (10x speed improvement)
-- Tidied up comments
-
-April 2013 - version 2.0
-- Major update and rewrite of library code:
- + Improved speed and efficiency of code
- + Increased level of abstraction in the library for pixel methods
- + Increased level of abstraction for character and font methods
- + Increased number of functions and added variable sized font
- + Changed defines to enumerated types within the scope of the class
- + Updated functionality to simplify controlling multiple devices
-- Changed text and comments to be aligned to doxygen documentation generation
-
-June 2012 - version 1.0
-- Incorporated elements of Arduino LedControl (Eberhard Fahle) and MAX7219 libraries
-- Easier functionality for pixel graphics treatment of 8x8 matrices
-
-\page pageSoftware Software Library
-The Library
------------
-The library implements functions that allow the MAX72xx to be used
-for LED matrices (64 individual LEDs), allowing the programmer to use the LED
-matrix as a pixel device, displaying graphics elements much like any other
-pixel addressable display.
-
-In this scenario, it is convenient to abstract out the concept of the hardware device
-and create a uniform and consistent pixel address space, with the libraries determining
-device and device-element address. Similarly, control of the devices should be uniform
-and abstracted to a system level.
-
-The library still retains flexibility for device level control, should the developer
-require, through the use of overloaded class methods.
-___
-
-Conditional Compilation Switches
---------------------------------
-The library allows the run time code to be tailored through the use of compilation
-switches. The compile options start with USE_ and are documented in the section
-related to the main header file MD_MAX72xx.h.
-
-_NOTE_: Compile switches must be edited in the library header file. Arduino header file
-'mashing' during compilation makes the setting of these switches from user code
-completely unreliable.
-
-\page pageConnect System Connections
-Connections to the Arduino Board (SPI interface)
-------------------------------------------------
-The modules are connected through a 4-wire serial interface (SPI), and devices are cascaded,
-with communications passed through the first device in the chain to all others. The Arduino
-should be connected to the IN side of the first module in the chain.
-
-The Arduino interface is implemented with either
-+ The hardware SPI interface, or
-+ 3 arbitrary digital outputs that are passed through to the class constructor.
-
-The AVR hardware SPI interface is fast but fixed to predetermined output pins. The more general
-software interface uses the Arduino shiftOut() library function, making it slower but allows the
-use of arbitrary digital pins to send the data to the device. Which mode is enabled depends
-on the class constructor used.
-
-The Arduino interface is implemented with 3 digital outputs that are passed through to
-the class constructor. The digital outputs define the SPI interface as follows:
-- DIN (MOSI) - the Data IN signal shifts data into the display module. Data is loaded into
-the device's internal 16-bit shift register on CLK's rising edge.
-- CLK (SCK) - the CLocK signal that is used to time the data for the device.
-- LD (SS) - the interface is active when LoaD signal is LOW. Serial data are loaded into the
-device shift register while LOAD is LOW and latched in on the rising edge.
-
-The LD signal is used to select the entire device chain. This allows separate LD
-outputs to control multiple displays sharing the same DIN and CLK signals. The
-software needs to instantiate a separate object for each display.
-
-The remaining interface pins are for +5V and GND. The power supply must be able to supply
-enough current for the number of connected modules.
-*/
+//#else
+//#include <Arduino.h>
+//#endif
 
 /**
  \def USE_LOCAL_FONT
@@ -303,12 +64,17 @@ enough current for the number of connected modules.
 #define MAX_INTENSITY 0xf ///< The maximum intensity value that can be set for a LED array
 #define MAX_SCANLIMIT 7   ///< The maximum scan limit value that can be set for the devices
 
-/**
- * Core object for the MD_MAX72XX library
- */
-class MD_MAX72XX
+// Font properties info structure
+typedef struct
 {
-public:
+    uint8_t version;     // (v1) font definition version number (for compliance)
+    uint8_t height;      // (v1) font height in pixels
+    uint8_t widthMax;    // (v1) font maximum width in pixels (widest character)
+    uint16_t firstASCII; // (v1,2) the first character code in the font table
+    uint16_t lastASCII;  // (v1,2) the last character code in the font table
+    uint16_t dataOffset; // (v1) offset from the start of table to first character definition
+} fontInfo_t;
+
   /**
   * Module Type enumerated type.
   *
@@ -391,7 +157,54 @@ public:
     TINV  ///< Transform INVert (pixels inverted)
   };
 
-  /**
+typedef struct
+{
+    uint8_t dig[ROW_SIZE];  // data for each digit of the MAX72xx (DIG0-DIG7)
+    uint8_t changed;        // one bit for each digit changed ('dirty bit')
+} deviceInfo_t;
+
+/**
+ * Core object for the MD_MAX72XX library
+ */
+typedef struct {
+    // LED module wiring parameters defined by hardware type
+    enum moduleType_t _mod;  // The module type from the available list
+    bool _hwDigRows;    // MAX72xx digits are mapped to rows in on the matrix
+    bool _hwRevCols;    // Normal orientation is col 0 on the right. Set to true if reversed
+    bool _hwRevRows;    // Normal orientation is row 0 at the top. Set to true if reversed
+
+    uint8_t _dataPin;     // DATA is shifted out of this pin ...
+    uint8_t _clkPin;      // ... signaled by a CLOCK on this pin ...
+    uint8_t _csPin;       // ... and LOADed when the chip select pin is driven HIGH to LOW
+    bool    _hardwareSPI; // true if SPI interface is the hardware interface
+
+    // Device buffer data
+    uint8_t _maxDevices;  // maximum number of devices in use
+    deviceInfo_t* _matrix;// the current status of the LED matrix (buffers)
+    uint8_t*  _spiData;   // data buffer for writing to SPI interface
+
+    // User callback function for shifting operations
+    uint8_t (*_cbShiftDataIn)(uint8_t dev, enum transformType_t t);
+    void    (*_cbShiftDataOut)(uint8_t dev, enum transformType_t t, uint8_t colData);
+
+    // Control data for the library
+    bool    _updateEnabled; // update the display when this is true, suspend otherwise
+    bool    _wrapAround;    // when shifting, wrap left to right and vice versa (circular buffer)
+
+    // SPI interface data
+#ifdef __MBED__
+//    SPI   _spi;           // Mbed SPI object
+//    DigitalOut _cs;
+#endif
+#if USE_LOCAL_FONT
+    // Font related data
+    fontType_t  *_fontData;   // pointer to the current font data being used
+    fontInfo_t  _fontInfo;    // properties of the current font table
+
+#endif
+} MD_MAX72XX_t;
+
+/**
    * Class Constructor - arbitrary digital interface.
    *
    * Instantiate a new instance of the class. The parameters passed are used to
@@ -406,7 +219,7 @@ public:
    *                    Memory for device buffers is dynamically allocated based
    *                    on this parameter.
    */
-  MD_MAX72XX(moduleType_t mod, uint8_t dataPin, uint8_t clkPin, uint8_t csPin, uint8_t numDevices=1);
+  void MD_MAX72XX_constructor(MD_MAX72XX_t *m,enum moduleType_t mod, uint8_t dataPin, uint8_t clkPin, uint8_t csPin, uint8_t numDevices);
 
   /**
    * Class Constructor - SPI hardware interface.
@@ -423,7 +236,7 @@ public:
    *                    Memory for device buffers is dynamically allocated based
    *                    on this parameter.
    */
-  MD_MAX72XX(moduleType_t mod, uint8_t csPin, uint8_t numDevices=1);
+  void MD_MAX72XX_constructor2(MD_MAX72XX_t *m,enum moduleType_t mod, uint8_t csPin, uint8_t numDevices);
 
   /**
    * Initialize the object.
@@ -435,7 +248,7 @@ public:
    * and all LEDs cleared (off). Test, shutdown and decode modes are off. Display updates
    * are on and wraparound is off.
    */
-  void begin(void);
+  void MD_MAX72XX_begin(MD_MAX72XX_t *m);
 
   /**
    * Class Destructor.
@@ -443,7 +256,7 @@ public:
    * Released allocated memory and does the necessary to clean up once the object is
    * no longer required.
    */
-  ~MD_MAX72XX();
+  void MD_MAX72XX_destructor(MD_MAX72XX_t *m);
 
   //--------------------------------------------------------------
   /** \name Methods for object and hardware control.
@@ -463,9 +276,30 @@ public:
    * \param value   parameter value or one of the control status defined.
    * \return false if parameter errors, true otherwise.
    */
-  bool control(uint8_t dev, controlRequest_t mode, int value);
+  bool MD_MAX72XX_control(MD_MAX72XX_t *m,uint8_t dev, enum controlRequest_t mode, int value);
 
-  /**
+/**
+ * Gets the number of devices attached to this class instance.
+ *
+ * \return uint8_t representing the number of devices attached to this object.
+ */
+inline uint8_t MD_MAX72XX_getDeviceCount(MD_MAX72XX_t *m) { return(m->_maxDevices); };
+
+/**
+ * Set the control status of the specified parameter for contiguous subset of devices.
+ *
+ * Invokes the control function for each device in turn for the devices in the subset.
+ * See documentation for the control() method.
+ *
+ * \param startDev  the first device for the control action [0..getDeviceCount()-1]
+ * \param endDev    the last device for the control action [0..getDeviceCount()-1]
+ * \param mode      one of the defined control requests.
+ * \param value     parameter value or one of the control status defined.
+ * \return false if parameter errors, true otherwise.
+ */
+bool MD_MAX72XX_control2(MD_MAX72XX_t *m,uint8_t startDev, uint8_t endDev, enum controlRequest_t mode, int value);
+
+/**
    * Set the control status of the specified parameter for all devices.
    *
    * Invokes the control function for each device in turn. as this is a wrapper for the
@@ -475,37 +309,18 @@ public:
    * \param value   parameter value or one of the control status defined.
    * \return No return value.
    */
-  inline void control(controlRequest_t mode, int value) { control(0, getDeviceCount()-1, mode, value); };
-
-  /**
-   * Set the control status of the specified parameter for contiguous subset of devices.
-   *
-   * Invokes the control function for each device in turn for the devices in the subset.
-   * See documentation for the control() method.
-   *
-   * \param startDev  the first device for the control action [0..getDeviceCount()-1]
-   * \param endDev    the last device for the control action [0..getDeviceCount()-1]
-   * \param mode      one of the defined control requests.
-   * \param value     parameter value or one of the control status defined.
-   * \return false if parameter errors, true otherwise.
-   */
-  bool control(uint8_t startDev, uint8_t endDev, controlRequest_t mode, int value);
-
-  /**
-   * Gets the number of devices attached to this class instance.
-   *
-   * \return uint8_t representing the number of devices attached to this object.
-   */
-  uint8_t getDeviceCount(void) { return(_maxDevices); };
+  void MD_MAX72XX_control1(MD_MAX72XX_t *m,enum controlRequest_t mode, int value);
 
   /**
    * Gets the maximum number of columns for devices attached to this class instance.
    *
    * \return uint16_t representing the number of columns.
    */
-  uint16_t getColumnCount(void) { return(_maxDevices*COL_SIZE); };
+  inline uint16_t MD_MAX72XX_getColumnCount(MD_MAX72XX_t *m) { return(m->_maxDevices*COL_SIZE); }
 
-  /**
+  void MD_MAX72XX_setModuleParameters(MD_MAX72XX_t *m,enum moduleType_t mod);   // setup parameters based on module type
+
+/**
    * Set the type of hardware module being used.
    *
    * This method changes the type of module being used in the application 
@@ -514,7 +329,7 @@ public:
    * \param mod module type used in this application; one of the moduleType_t values.
    * \return No return data
    */
-  void setModuleType(moduleType_t mod) { setModuleParameters(mod); };
+  inline void MD_MAX72XX_setModuleType(MD_MAX72XX_t *m,enum moduleType_t mod) { MD_MAX72XX_setModuleParameters(m,mod); }
   
   /**
    * Set the Shift Data In callback function.
@@ -535,7 +350,7 @@ public:
    * \param cb  the address of the user function to be called from the library.
    * \return No return data
    */
-  void setShiftDataInCallback(uint8_t (*cb)(uint8_t dev, transformType_t t)) { _cbShiftDataIn = cb; };
+  inline void MD_MAX72XX_setShiftDataInCallback(MD_MAX72XX_t *m,uint8_t (*cb)(uint8_t dev, enum transformType_t t)) { m->_cbShiftDataIn = cb; }
 
   /**
    * Set the Shift Data Out callback function.
@@ -556,7 +371,7 @@ public:
    * \param cb  the address of the user function to be called from the library.
    * \return No return data
    */
-  void setShiftDataOutCallback(void (*cb)(uint8_t dev, transformType_t t, uint8_t colData)) { _cbShiftDataOut = cb; };
+  inline void MD_MAX72XX_setShiftDataOutCallback(MD_MAX72XX_t *m,void (*cb)(uint8_t dev, enum transformType_t t, uint8_t colData)) { m->_cbShiftDataOut = cb; }
 
   /** @} */
 
@@ -564,23 +379,23 @@ public:
   /** \name Methods for graphics and bitmap related abstraction.
    * @{
    */
-  /**
+/**
+ * Clear all the display data on a subset of devices.
+ *
+ * endDev must be greater than or equal to startDev.
+ *
+ * \param startDev  the first device to clear [0..getDeviceCount()-1]
+ * \param endDev    the last device to clear [0..getDeviceCount()-1]
+ * \return No return value.
+ */
+void MD_MAX72XX_clear(MD_MAX72XX_t *m,uint8_t startDev, uint8_t endDev);
+
+/**
    * Clear all the display data on all the display devices.
    *
    * \return No return value.
    */
-  inline void clear(void) { clear(0, getDeviceCount()-1); };
-
-  /**
-   * Clear all the display data on a subset of devices.
-   *
-   * endDev must be greater than or equal to startDev.
-   *
-   * \param startDev  the first device to clear [0..getDeviceCount()-1]
-   * \param endDev    the last device to clear [0..getDeviceCount()-1]
-   * \return No return value.
-   */
-  void clear(uint8_t startDev, uint8_t endDev);
+  void MD_MAX72XX_clear1(MD_MAX72XX_t *m);
 
   /**
    * Load a bitmap from the display buffers to a user buffer.
@@ -595,9 +410,21 @@ public:
    * \param *pd   Pointer to a data buffer [0..size-1].
    * \return false if parameter errors, true otherwise. If true, data will be in the buffer at *pd.
    */
-  bool getBuffer(uint16_t col, uint8_t size, uint8_t *pd);
+  bool MD_MAX72XX_getBuffer(MD_MAX72XX_t *m,uint16_t col, uint8_t size, uint8_t *pd);
 
-  /**
+/**
+ * Get the state of the LEDs in a specific column.
+ *
+ * This method operates on the specific buffer, returning the bit field value of
+ * the LEDs in the column.
+ *
+ * \param buf   address of the display [0..getDeviceCount()-1].
+ * \param c     column which is to be set [0..COL_SIZE-1].
+ * \return uint8_t value with each bit set to 1 if the corresponding LED is lit. 0 is returned for parameter error.
+ */
+uint8_t MD_MAX72XX_getColumn(MD_MAX72XX_t *m,uint8_t buf, uint8_t c);
+
+/**
    * Get the LEDS status for the specified column.
    *
    * This method operates on a specific buffer
@@ -609,7 +436,7 @@ public:
    * \param c   column to be read [0..getColumnCount()-1].
    * \return uint8_t value with each bit set to 1 if the corresponding LED is lit. 0 is returned for parameter error.
    */
-  uint8_t getColumn(uint8_t c) { return getColumn((c / COL_SIZE), c % COL_SIZE); };
+uint8_t MD_MAX72XX_getColumn1(MD_MAX72XX_t *m,uint8_t c);
 
   /**
    * Get the status of a single LED, addressed as a pixel.
@@ -623,7 +450,7 @@ public:
    * \param c   column coordinate for the point [0..getColumnCount()-1].
    * \return true if LED is on, false if off or parameter errors.
    */
-  bool getPoint(uint8_t r, uint16_t c);
+  bool MD_MAX72XX_getPoint(MD_MAX72XX_t *m,uint8_t r, uint16_t c);
 
  /**
    * Load a bitfield from the user buffer to a display buffer.
@@ -638,23 +465,38 @@ public:
    * \param *pd   Pointer to a data buffer [0..size-1].
    * \return false if parameter errors, true otherwise.
    */
-  bool setBuffer(uint16_t col, uint8_t size, uint8_t *pd);
+  bool MD_MAX72XX_setBuffer(MD_MAX72XX_t *m,uint16_t col, uint8_t size, uint8_t *pd);
 
-  /**
-   * Set all LEDs in a specific column to a new state.
-   *
-   * This method operates on one column, setting the value of the LEDs in
-   * the column to the specified value bitfield. The column is
-   * referenced with the absolute column number (ie, the device number is
-   * inferred from the column). The method is useful for drawing vertical
-   * lines and patterns when the display is being treated as a pixel field.
-   * The least significant bit of the value is the lowest row number.
-   *
-   * \param c     column which is to be set [0..getColumnCount()-1].
-   * \param value each bit set to 1 will light up the corresponding LED.
-   * \return false if parameter errors, true otherwise.
-   */
-  bool setColumn(uint16_t c, uint8_t value) { return setColumn((c / COL_SIZE), c % COL_SIZE, value); };
+/**
+ * Set all LEDs in a column to a new state.
+ *
+ * This method operates on a specific buffer, setting the value of the LEDs in
+ * the column to the specified value bit field. The method is useful for
+ * drawing patterns and lines vertically on the display device.
+ * The least significant bit of the value is the lowest column number.
+ *
+ * \param buf   address of the display [0..getDeviceCount()-1].
+ * \param c     column which is to be set [0..COL_SIZE-1].
+ * \param value each bit set to 1 will light up the	corresponding LED.
+ * \return false if parameter errors, true otherwise.
+ */
+bool MD_MAX72XX_setColumn(MD_MAX72XX_t *m,uint8_t buf, uint8_t c, uint8_t value);
+
+/**
+ * Set all LEDs in a specific column to a new state.
+ *
+ * This method operates on one column, setting the value of the LEDs in
+ * the column to the specified value bitfield. The column is
+ * referenced with the absolute column number (ie, the device number is
+ * inferred from the column). The method is useful for drawing vertical
+ * lines and patterns when the display is being treated as a pixel field.
+ * The least significant bit of the value is the lowest row number.
+ *
+ * \param c     column which is to be set [0..getColumnCount()-1].
+ * \param value each bit set to 1 will light up the corresponding LED.
+ * \return false if parameter errors, true otherwise.
+ */
+inline bool MD_MAX72XX_setColumn2(MD_MAX72XX_t *m,uint16_t c, uint8_t value) { return MD_MAX72XX_setColumn(m,(c / COL_SIZE), c % COL_SIZE, value); };
 
   /**
    * Set the status of a single LED, addressed as a pixel.
@@ -670,9 +512,26 @@ public:
    * \param state true - switch on; false - switch off.
    * \return false if parameter errors, true otherwise.
    */
-  bool setPoint(uint8_t r, uint16_t c, bool state);
+  bool MD_MAX72XX_setPoint(MD_MAX72XX_t *m,uint8_t r, uint16_t c, bool state);
 
-  /**
+/**
+ * Set all LEDs in a row to a new state on contiguous subset of devices.
+ *
+ * This method operates on a contiguous subset of devices, setting the value
+ * of the LEDs in the row to the specified value bit field. The method is useful for
+ * drawing patterns and lines horizontally across specific devices only.
+ * endDev must be greater than or equal to startDev.
+ * The least significant bit of the value is the lowest column number.
+ *
+ * \param startDev  the first device for the transformation [0..getDeviceCount()-1]
+ * \param endDev    the last device for the transformation [0..getDeviceCount()-1]
+ * \param r         row which is to be set [0..ROW_SIZE-1].
+ * \param value     each bit set to 1 will light up the corresponding LED on each device.
+ * \return false if parameter errors, true otherwise.
+ */
+bool MD_MAX72XX_setRow(MD_MAX72XX_t *m,uint8_t startDev, uint8_t endDev, uint8_t r, uint8_t value);
+
+/**
    * Set all LEDs in a row to a new state on all devices.
    *
    * This method operates on all devices, setting the value of the LEDs in
@@ -684,26 +543,39 @@ public:
    * \param value  each bit set to 1 will light up the corresponding LED on each device.
    * \return false if parameter errors, true otherwise.
    */
-  inline bool setRow(uint8_t r, uint8_t value) { return setRow(0, getDeviceCount()-1, r, value); };
+  inline bool MD_MAX72XX_setRow2(MD_MAX72XX_t *m,uint8_t r, uint8_t value) { return MD_MAX72XX_setRow(m,0, MD_MAX72XX_getDeviceCount(m)-1, r, value); };
 
-  /**
-   * Set all LEDs in a row to a new state on contiguous subset of devices.
-   *
-   * This method operates on a contiguous subset of devices, setting the value
-   * of the LEDs in the row to the specified value bit field. The method is useful for
-   * drawing patterns and lines horizontally across specific devices only.
-   * endDev must be greater than or equal to startDev.
-   * The least significant bit of the value is the lowest column number.
-   *
-   * \param startDev  the first device for the transformation [0..getDeviceCount()-1]
-   * \param endDev    the last device for the transformation [0..getDeviceCount()-1]
-   * \param r         row which is to be set [0..ROW_SIZE-1].
-   * \param value     each bit set to 1 will light up the corresponding LED on each device.
-   * \return false if parameter errors, true otherwise.
-   */
-  bool setRow(uint8_t startDev, uint8_t endDev, uint8_t r, uint8_t value);
+/**
+ * Set all LEDs in a row to a new state.
+ *
+ * This method operates on a specific device, setting the value of the LEDs in
+ * the row to the specified value bit field. The method is useful for
+ * drawing patterns and lines horizontally across the display device.
+ * The least significant bit of the value is the lowest row number.
+ *
+ * \param buf   address of the display [0..getDeviceCount()-1].
+ * \param r     row which is to be set [0..ROW_SIZE-1].
+ * \param value each bit set to 1 within this byte will light up the corresponding LED.
+ * \return false if parameter errors, true otherwise.
+ */
+bool setRow3(uint8_t buf, uint8_t r, uint8_t value);
 
-  /**
+/**
+ * Apply a transformation to the data in contiguous subset of devices.
+ *
+ * The buffers for all devices in the subset can be transformed using one of the enumerated
+ * transformations in transformType_t. The transformation is carried across
+ * device boundaries (ie, there is overflow to an adjacent devices if appropriate).
+ * endDev must be greater than or equal to startDev.
+ *
+ * \param startDev  the first device for the transformation [0..getDeviceCount()-1]
+ * \param endDev    the last device for the transformation [0..getDeviceCount()-1]
+ * \param ttype     one of the transformation types in transformType_t.
+ * \return false if parameter errors, true otherwise.
+ */
+bool MD_MAX72XX_transform(MD_MAX72XX_t *m,uint8_t startDev, uint8_t endDev, enum transformType_t ttype);
+
+/**
    * Apply a transformation to the data in all the devices.
    *
    * The buffers for all devices can be transformed using one of the enumerated
@@ -713,22 +585,7 @@ public:
    * \param ttype  one of the transformation types in transformType_t.
    * \return false if parameter errors, true otherwise.
    */
-  inline bool transform(transformType_t ttype) { return transform(0, getDeviceCount()-1, ttype); };
-
-  /**
-   * Apply a transformation to the data in contiguous subset of devices.
-   *
-   * The buffers for all devices in the subset can be transformed using one of the enumerated
-   * transformations in transformType_t. The transformation is carried across
-   * device boundaries (ie, there is overflow to an adjacent devices if appropriate).
-   * endDev must be greater than or equal to startDev.
-   *
-   * \param startDev  the first device for the transformation [0..getDeviceCount()-1]
-   * \param endDev    the last device for the transformation [0..getDeviceCount()-1]
-   * \param ttype     one of the transformation types in transformType_t.
-   * \return false if parameter errors, true otherwise.
-   */
-  bool transform(uint8_t startDev, uint8_t endDev, transformType_t ttype);
+  inline bool MD_MAX72XX_transform1(MD_MAX72XX_t *m,enum transformType_t ttype) { return MD_MAX72XX_transform(m,0, MD_MAX72XX_getDeviceCount(m)-1, ttype); };
 
   /**
    * Turn auto display updates on or off.
@@ -742,8 +599,9 @@ public:
    * \param mode  one of the types in controlValue_t (ON/OFF).
    * \return No return value.
    */
-  void update(controlValue_t mode) { control(UPDATE, mode); };
+  void MD_MAX72XX_update(MD_MAX72XX_t *m,enum controlValue_t mode);
 
+  void MD_MAX72XX_flushBufferAll(MD_MAX72XX_t *m);          // determine what needs to be sent for all devices and transmit
   /**
    * Force an update of all devices
    *
@@ -753,7 +611,7 @@ public:
    *
    * \return no return value.
    */
-  void update(void) { flushBufferAll(); };
+  inline void MD_MAX72XX_update1(MD_MAX72XX_t *m) { MD_MAX72XX_flushBufferAll(m); };
 
   /**
    * Turn display wraparound on or off.
@@ -767,7 +625,7 @@ public:
    * \param mode  one of the types in controlValue_t (ON/OFF).
    * \return No return value.
    */
-  void wraparound(controlValue_t mode) { control(WRAPAROUND, mode); };
+  inline void MD_MAX72XX_wraparound(MD_MAX72XX_t *m,enum controlValue_t mode) { MD_MAX72XX_control1(m,WRAPAROUND, mode); };
   /** @} */
 
   //--------------------------------------------------------------
@@ -780,19 +638,7 @@ public:
    * \param buf   address of the buffer to clear [0..getDeviceCount()-1].
    * \return false if parameter errors, true otherwise.
    */
-  bool clear(uint8_t buf);
-
-  /**
-   * Get the state of the LEDs in a specific column.
-   *
-   * This method operates on the specific buffer, returning the bit field value of
-   * the LEDs in the column.
-   *
-   * \param buf   address of the display [0..getDeviceCount()-1].
-   * \param c     column which is to be set [0..COL_SIZE-1].
-   * \return uint8_t value with each bit set to 1 if the corresponding LED is lit. 0 is returned for parameter error.
-   */
-  uint8_t getColumn(uint8_t buf, uint8_t c);
+  bool MD_MAX72XX_clear2(MD_MAX72XX_t *m,uint8_t buf);
 
   /**
    * Get the state of the LEDs in a specified row.
@@ -804,22 +650,7 @@ public:
    * \param r     row which is to be set [0..ROW_SIZE-1].
    * \return uint8_t value with each bit set to 1 if the corresponding LED is lit. 0 is returned for parameter error.
    */
-  uint8_t getRow(uint8_t buf, uint8_t r);
-
-  /**
-   * Set all LEDs in a column to a new state.
-   *
-   * This method operates on a specific buffer, setting the value of the LEDs in
-   * the column to the specified value bit field. The method is useful for
-   * drawing patterns and lines vertically on the display device.
-   * The least significant bit of the value is the lowest column number.
-   *
-   * \param buf   address of the display [0..getDeviceCount()-1].
-   * \param c     column which is to be set [0..COL_SIZE-1].
-   * \param value each bit set to 1 will light up the	corresponding LED.
-   * \return false if parameter errors, true otherwise.
-   */
-  bool setColumn(uint8_t buf, uint8_t c, uint8_t value);
+  uint8_t MD_MAX72XX_getRow(MD_MAX72XX_t *m,uint8_t buf, uint8_t r);
 
   /**
    * Set all LEDs in a row to a new state.
@@ -834,7 +665,7 @@ public:
    * \param value each bit set to 1 within this byte will light up the corresponding LED.
    * \return false if parameter errors, true otherwise.
    */
-  bool setRow(uint8_t buf, uint8_t r, uint8_t value);
+  bool MD_MAX72XX_setRow1(MD_MAX72XX_t *m,uint8_t buf, uint8_t r, uint8_t value);
 
   /**
    * Apply a transformation to the data in the specified device.
@@ -847,9 +678,11 @@ public:
    * \param ttype  one of the transformation types in transformType_t.
    * \return false if parameter errors, true otherwise.
    */
-  bool transform(uint8_t buf, transformType_t ttype);
+  bool MD_MAX72XX_transform2(MD_MAX72XX_t *m,uint8_t buf, enum transformType_t ttype);
 
-  /**
+void MD_MAX72XX_flushBuffer(MD_MAX72XX_t *m,uint8_t buf);  // determine what needs to be sent for one device and transmit
+
+/**
    * Force an update of one buffer.
    *
    * Used when auto updates have been turned off through the control()
@@ -860,7 +693,7 @@ public:
    * \param buf address of the display [0..getBufferCount()-1].
    * \return No return value.
    */
-  void update(uint8_t buf) { flushBuffer(buf); };
+inline void MD_MAX72XX_update2(MD_MAX72XX_t *m,uint8_t buf) { MD_MAX72XX_flushBuffer(m,buf); };
   /** @} */
 
 #if USE_LOCAL_FONT
@@ -883,7 +716,7 @@ public:
    * \param buf   address of the user buffer supplied.
    * \return width (in columns) of the character, 0 if parameter errors.
    */
-  uint8_t getChar(uint16_t c, uint8_t size, uint8_t *buf);
+  uint8_t MD_MAX72XX_getChar(MD_MAX72XX_t *m,uint16_t c, uint8_t size, uint8_t *buf);
 
   /**
    * Load a character from the font data starting at a specific column.
@@ -898,7 +731,7 @@ public:
    * \param c   the character to display.
    * \return width (in columns) of the character, 0 if parameter errors.
    */
-  uint8_t setChar(uint16_t col, uint16_t c);
+  uint8_t MD_MAX72XX_setChar(MD_MAX72XX_t *m,uint16_t col, uint16_t c);
 
   /**
    * Set the current font table.
@@ -915,7 +748,7 @@ public:
    * \param f fontType_t pointer to the table of font data in PROGMEM or nullptr.
    * \return false if parameter errors, true otherwise.
    */
-  bool setFont(fontType_t *f);
+  bool MD_MAX72XX_setFont(MD_MAX72XX_t *m,fontType_t *f);
 
   /**
   * Get the maximum width character for the font.
@@ -929,7 +762,7 @@ public:
   *
   * \return number of columns (width) for the widest character.
   */
-  uint8_t getMaxFontWidth(void) { return(_fontInfo.widthMax); };
+  inline uint8_t MD_MAX72XX_getMaxFontWidth(MD_MAX72XX_t *m) { return(m->_fontInfo.widthMax); };
 
   /**
   * Get height of a character for the font.
@@ -942,7 +775,7 @@ public:
   *
   * \return number of rows (height) for the font.
   */
-  uint8_t getFontHeight(void) { return(_fontInfo.height); };
+  inline uint8_t MD_MAX72XX_getFontHeight(MD_MAX72XX_t *m) { return(m->_fontInfo.height); };
 
   /**
    * Get the pointer to current font table.
@@ -955,91 +788,33 @@ public:
    *
    * \return pointer to the start of the font table in PROGMEM.
    */
-  fontType_t *getFont(void) { return(_fontData); };
+  inline fontType_t *MD_MAX72XX_getFont(MD_MAX72XX_t *m) { return(m->_fontData); };
+
+void    MD_MAX72XX_setFontInfoDefault(MD_MAX72XX_t *m);      // set the default parameters for the font info file
+void    MD_MAX72XX_loadFontInfo(MD_MAX72XX_t *m);            // load the font info block from the font data
+uint8_t MD_MAX72XX_getFontWidth(MD_MAX72XX_t *m);            // get the maximum font width by inspecting the font table
+int32_t MD_MAX72XX_getFontCharOffset(MD_MAX72XX_t *m,uint16_t c); // find the character in the font data. If not there, return -1
+
 #endif // USE_LOCAL_FONT
   /** @} */
 
-private:
-  typedef struct
-  {
-  uint8_t dig[ROW_SIZE];  // data for each digit of the MAX72xx (DIG0-DIG7)
-  uint8_t changed;        // one bit for each digit changed ('dirty bit')
-  } deviceInfo_t;
-
-  // LED module wiring parameters defined by hardware type
-  moduleType_t _mod;  // The module type from the available list
-  bool _hwDigRows;    // MAX72xx digits are mapped to rows in on the matrix
-  bool _hwRevCols;    // Normal orientation is col 0 on the right. Set to true if reversed
-  bool _hwRevRows;    // Normal orientation is row 0 at the top. Set to true if reversed
-
-  uint8_t _dataPin;     // DATA is shifted out of this pin ...
-  uint8_t _clkPin;      // ... signaled by a CLOCK on this pin ...
-  uint8_t _csPin;       // ... and LOADed when the chip select pin is driven HIGH to LOW
-  bool    _hardwareSPI; // true if SPI interface is the hardware interface
-
-  // Device buffer data
-  uint8_t _maxDevices;  // maximum number of devices in use
-  deviceInfo_t* _matrix;// the current status of the LED matrix (buffers)
-  uint8_t*  _spiData;   // data buffer for writing to SPI interface
-
-  // User callback function for shifting operations
-  uint8_t (*_cbShiftDataIn)(uint8_t dev, transformType_t t);
-  void    (*_cbShiftDataOut)(uint8_t dev, transformType_t t, uint8_t colData);
-
-  // Control data for the library
-  bool    _updateEnabled; // update the display when this is true, suspend otherwise
-  bool    _wrapAround;    // when shifting, wrap left to right and vice versa (circular buffer)
-
-  // SPI interface data
-#ifdef __MBED__
-  SPI   _spi;           // Mbed SPI object
-  DigitalOut _cs;
-#endif
-#if USE_LOCAL_FONT
-  // Font properties info structure
-   typedef struct
-   {
-     uint8_t version;     // (v1) font definition version number (for compliance)
-     uint8_t height;      // (v1) font height in pixels
-     uint8_t widthMax;    // (v1) font maximum width in pixels (widest character)
-     uint16_t firstASCII; // (v1,2) the first character code in the font table
-     uint16_t lastASCII;  // (v1,2) the last character code in the font table
-     uint16_t dataOffset; // (v1) offset from the start of table to first character definition
-   } fontInfo_t;
-
-  // Font related data
-  fontType_t  *_fontData;   // pointer to the current font data being used
-  fontInfo_t  _fontInfo;    // properties of the current font table
-
-  void    setFontInfoDefault(void);      // set the default parameters for the font info file
-  void    loadFontInfo(void);            // load the font info block from the font data
-  uint8_t getFontWidth(void);            // get the maximum font width by inspecting the font table
-  int32_t getFontCharOffset(uint16_t c); // find the character in the font data. If not there, return -1
-#endif
-
   // Private functions
-  void spiSend(void);         // do the actual physical communications task
-  void spiClearBuffer(void);  // clear the SPI send buffer
-  void controlHardware(uint8_t dev, controlRequest_t mode, int value);  // set hardware control commands
-  void controlLibrary(controlRequest_t mode, int value);  // set internal control commands
+  void MD_MAX72XX_spiInit(MD_MAX72XX_t *m);
+  void MD_MAX72XX_spiSend(MD_MAX72XX_t *m);         // do the actual physical communications task
+  void MD_MAX72XX_spiClearBuffer(MD_MAX72XX_t *m);  // clear the SPI send buffer
+  void MD_MAX72XX_controlHardware(MD_MAX72XX_t *m,uint8_t dev, enum controlRequest_t mode, int value);  // set hardware control commands
+  void MD_MAX72XX_controlLibrary(MD_MAX72XX_t *m,enum controlRequest_t mode, int value);  // set internal control commands
 
-  void flushBuffer(uint8_t buf);  // determine what needs to be sent for one device and transmit
-  void flushBufferAll();          // determine what needs to be sent for all devices and transmit
+  uint8_t MD_MAX72XX_bitReverse(uint8_t b);  // reverse the order of bits in the byte
+  bool MD_MAX72XX_transformBuffer(MD_MAX72XX_t *m,uint8_t buf, enum transformType_t ttype); // internal transform function
 
-  uint8_t bitReverse(uint8_t b);  // reverse the order of bits in the byte
-  bool transformBuffer(uint8_t buf, transformType_t ttype); // internal transform function
-
-  bool copyRow(uint8_t buf, uint8_t rSrc, uint8_t rDest);   // copy a row from Src to Dest
-  bool copyColumn(uint8_t buf, uint8_t cSrc, uint8_t cDest);// copy a row from Src to Dest
-
-  void setModuleParameters(moduleType_t mod);   // setup parameters based on module type
+  bool MD_MAX72XX_copyRow(MD_MAX72XX_t *m,uint8_t buf, uint8_t rSrc, uint8_t rDest);   // copy a row from Src to Dest
+  bool MD_MAX72XX_copyColumn(MD_MAX72XX_t *m,uint8_t buf, uint8_t cSrc, uint8_t cDest);// copy a row from Src to Dest
 
   // _hwDigRev switched function for internal use
-  bool copyC(uint8_t buf, uint8_t cSrc, uint8_t cDest);
-  bool copyR(uint8_t buf, uint8_t rSrc, uint8_t rDest);
-  uint8_t getC(uint8_t buf, uint8_t c);
-  uint8_t getR(uint8_t buf, uint8_t r);
-  bool setC(uint8_t buf, uint8_t c, uint8_t value);
-  bool setR(uint8_t buf, uint8_t r, uint8_t value);
-
-};
+  bool MD_MAX72XX_copyC(MD_MAX72XX_t *m,uint8_t buf, uint8_t cSrc, uint8_t cDest);
+  bool MD_MAX72XX_copyR(MD_MAX72XX_t *m,uint8_t buf, uint8_t rSrc, uint8_t rDest);
+  uint8_t MD_MAX72XX_getC(MD_MAX72XX_t *m,uint8_t buf, uint8_t c);
+  uint8_t MD_MAX72XX_getR(MD_MAX72XX_t *m,uint8_t buf, uint8_t r);
+  bool MD_MAX72XX_setC(MD_MAX72XX_t *m,uint8_t buf, uint8_t c, uint8_t value);
+  bool MD_MAX72XX_setR(MD_MAX72XX_t *m,uint8_t buf, uint8_t r, uint8_t value);

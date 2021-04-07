@@ -68,15 +68,23 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #define FONT_FILE_INDICATOR 'F' ///< Font table indicator prefix for info header
 
 // Shortcuts
-#define SPI_DATA_SIZE (sizeof(uint8_t)*_maxDevices*2)   ///< Size of the SPI data buffers
+#define SPI_DATA_SIZE (sizeof(uint8_t)*m->_maxDevices*2)   ///< Size of the SPI data buffers
 #define SPI_OFFSET(i,x) (((LAST_BUFFER-(i))*2)+(x))     ///< SPI data offset for buffer i, digit x
 
 #define FIRST_BUFFER 0                 ///< First buffer number
-#define LAST_BUFFER  (_maxDevices-1)   ///< Last buffer number
+#define LAST_BUFFER  (m->_maxDevices-1)   ///< Last buffer number
 
 // Macros to map reversed ROW and COLUMN coordinates
-#define HW_ROW(r) (_hwRevRows ? (ROW_SIZE - 1 - (r)) : (r)) ///< Pixel to hardware coordinate row mapping
-#define HW_COL(c) (_hwRevCols ? (COL_SIZE - 1 - (c)) : (c)) ///< Pixel to hardware coordinate column mapping
+#define HW_ROW(r) (m->_hwRevRows ? (ROW_SIZE - 1 - (r)) : (r)) ///< Pixel to hardware coordinate row mapping
+#define HW_COL(c) (m->_hwRevCols ? (COL_SIZE - 1 - (c)) : (c)) ///< Pixel to hardware coordinate column mapping
+
+#ifndef max
+#define max(a,b)            (((a) > (b)) ? (a) : (b))
+#endif
+
+#ifndef min
+#define min(a,b)            (((a) < (b)) ? (a) : (b))
+#endif
 
 // variables shared in the library
 extern const uint8_t PROGMEM _sysfont[];  ///< System variable pitch font table
